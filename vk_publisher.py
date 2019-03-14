@@ -3,18 +3,21 @@ from dotenv import load_dotenv
 import os
 
 
-def get_response_from_vk(method_name, payload={}, 
-                        vk_host='https://api.vk.com/method'):
-    url = '{host}/{method}'.format(host=vk_host, method=method_name)
-    print(url)
+def get_response_from_vk(method, payload={}, 
+                        host='https://api.vk.com/method'):
+    url = '{host}/{method}'.format(host=host, method=method)
+    print('GET request to {url}'.format(url=url))
     response = requests.get(url, params=payload)
     response.raise_for_status()
     if response.ok:
         return response.json()
 
 
-def make_post_request_to_vk(url, payload):
-    response = requests.post(url, files=payload)
+def make_post_request_to_vk(url=None, method=None, params={}, files = {}, host='https://api.vk.com/method'):
+    if url is None:
+        url = '{host}/{method}'.format(host=host, method=method)
+    print('POST request to {url}'.format(url=url))
+    response = requests.post(url, files=files, params=params)
     response.raise_for_status()
     if response.ok:
         return response.json()
@@ -30,14 +33,16 @@ def main():
         'v': vk_api_version,  
         'group_id': vk_group_id, 
     }
+    #Получение адреса сервера
     response_getwall = get_response_from_vk('photos.getWallUploadServer', payload=payload)
     #
     upload_url = response_getwall['response']['upload_url']
-    print(upload_url)
-    #
+    #Формируем структуру данных с изображением
     image_file_descriptor = open('images/python_comics.png', 'rb')
     post_data = { 'photo': image_file_descriptor}
-    response_upload_photo = make_post_request_to_vk(upload_url, payload=post_data)
+    #Загружаем изображение на сервер
+    response_upload_photo = make_post_request_to_vk(url=upload_url, files=post_data)
+    #Разбираем данные из ответа сервера
     photo_server = response_upload_photo['server']
     photo_json = response_upload_photo['photo']
     photo_hash = response_upload_photo['hash']
@@ -47,12 +52,31 @@ def main():
         'server': photo_server,
         'photo': photo_json,
         'hash': photo_hash, 
+        'group_id': vk_group_id,
     }
-    url = '{host}/{method}'.format(host='https://api.vk.com/method', 
-                                    method='photos.saveWallPhoto')
-    response = requests.post(url, params=payload)
-    print(response.json())
-
+    #Загружаем изображение в альбом VK
+    #url = '{host}/{method}'.format(host='https://api.vk.com/method', 
+    #                                method='photos.saveWallPhoto')
+    response_save_wall = make_post_request_to_vk(method='photos.saveWallPhoto', params=payload)
+    print(response_save_wall)
+    #Публикуем фото на стене группы
+    owner_id = response_save_wall['response'][0]['owner_id']
+    media_id = response_save_wall['response'][0]['id']
+    attachments_temp = 'photo{owner_id}_{media_id}'
+    payload = {
+        'access_token': access_token,
+        'v': vk_api_version,  
+        'owner_id': '-{id}'.format(id=vk_group_id),
+        'attachments': attachments_temp.format(owner_id=owner_id, 
+                                                media_id=media_id),
+        'from_group': 1,
+        'message': 'Веселый комикс для веселого дня!'
+    }
+    
+    #url = '{host}/{method}'.format(host='https://api.vk.com/method', 
+    #                                method='wall.post')
+    response_wallpost = make_post_request_to_vk(method='wall.post', params=payload)
+    print(response_wallpost)
 
 if __name__ == '__main__':
     main()
