@@ -46,7 +46,7 @@ def download_image(image_url, image_filename):
         response = requests.get(image_url)
         response.raise_for_status()
         if response.ok:
-            save_image_as_file_in_folder(response.content, 
+            filename_saved = save_image_as_file_in_folder(response.content, 
                 image_filename=image_filename)
             msg = "Image is saved as {}".format(filename)
             return {'result': True, 'msg': msg, 'filename':filename_saved,}
