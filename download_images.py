@@ -22,17 +22,20 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def save_image_as_file_in_folder(image, folder_name='images', image_filename='image.jpeg'):
+def save_image_as_file_in_folder(image, folder_name='images', 
+                                image_filename='image.jpeg'):
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
     filename = os.path.join(folder_name, image_filename)
     with open(filename, 'wb') as file:
         file.write(image)	
+    return filename
 
 
-def get_file_extention(url):
+def get_file_extention(url, default_url_list=('jpg', 'jpeg', 'tif', 'pdf', 
+                                            'png', 'bmp')):
     parts = url.split('.')
-    if len(parts)>0 and parts[-1] in ('jpg', 'jpeg', 'tif', 'pdf', 'png', 'bmp'):
+    if len(parts)>0 and parts[-1] in :
         return parts[-1]
     else:
         return 'jpeg'
@@ -45,10 +48,12 @@ def download_image(image_url, image_filename):
         if response.ok:
             save_image_as_file_in_folder(response.content, 
                 image_filename=image_filename)
-            return('Image {0} saved as ../images/{1}'.format(image_url, image_filename))
+            msg = "Image is saved as {}".format(filename)
+            return {'result': True, 'msg': msg, 'filename':filename_saved,}
     except requests.exceptions.HTTPError as error:
-        return("Can't download image by url {0} with error: \n {1}".format(
-            image_url, error))
+        msg = "Can't download image by url {0} with error: \n {1}".format(
+                                                    image_url, error)
+        return { 'result': False, 'msg': msg, 'filename':None, }
 
     
 def download_images_by_urls(image_urls, image_filename_template='space'):
@@ -59,7 +64,7 @@ def download_images_by_urls(image_urls, image_filename_template='space'):
             number=image_index,
             extention=ext
         )
-        print(download_image(image_url, image_filename))
+        print(download_image(image_url, image_filename)['msg'])
 
 
 def download_images_by_urls_and_names(image_urls):
@@ -69,7 +74,7 @@ def download_images_by_urls_and_names(image_urls):
             name=image['name'],       
             extention=ext
         )
-        print(download_image(image['url'], image_filename))
+        print(download_image(image['url'], image_filename)['msg'])
 
 
 def main():
