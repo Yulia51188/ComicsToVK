@@ -32,13 +32,13 @@ def save_image_as_file_in_folder(image, folder_name='images',
     return filename
 
 
-def get_file_extention(url, default_url_list=('jpg', 'jpeg', 'tif', 'pdf', 
-                                            'png', 'bmp')):
-    parts = url.split('.')
-    if len(parts)>0 and parts[-1] in :
-        return parts[-1]
-    else:
-        return 'jpeg'
+# def get_file_extention(url, default_url_list=('jpg', 'jpeg', 'tif', 'pdf', 
+#                                             'png', 'bmp')):
+#     parts = url.split('.')
+#     if len(parts)>0 and parts[-1] in :
+#         return parts[-1]
+#     else:
+#         return 'jpeg'
 
 
 def download_image(image_url, image_filename):
@@ -48,7 +48,7 @@ def download_image(image_url, image_filename):
         if response.ok:
             filename_saved = save_image_as_file_in_folder(response.content, 
                 image_filename=image_filename)
-            msg = "Image is saved as {}".format(filename)
+            msg = "Image is saved as {}".format(filename_saved)
             return {'result': True, 'msg': msg, 'filename':filename_saved,}
     except requests.exceptions.HTTPError as error:
         msg = "Can't download image by url {0} with error: \n {1}".format(

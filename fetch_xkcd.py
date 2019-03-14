@@ -14,14 +14,15 @@ def fetch_xkcd(host='http://xkcd.com', method='info.0.json', number=None):
         return response.json()
 
 
-def fetch_random_comics():
+def download_random_comics():
     max_number = get_comics_count()
     random.seed()
-    number = random.randint(1, max_number)
-    print('Number {}'.format(number))
-
-
-
+    random_number = random.randint(1, max_number)
+    comics_data = fetch_xkcd(number=random_number)
+    download_result = download_images.download_image(comics_data['img'], 'comics.png')
+    saved_comics_data = comics_data
+    saved_comics_data['filename'] = download_result['filename']
+    return saved_comics_data
 
 
 def get_comics_count():
@@ -30,7 +31,7 @@ def get_comics_count():
 
 
 def main():
-    fetch_random_comics()
+    download_random_comics()
     # current_comics = fetch_xkcd()
     # current_comics_url = current_comics['img']
     # print(current_comics_url)

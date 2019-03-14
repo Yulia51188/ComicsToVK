@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+import fetch_xkcd
 
 
 def get_response_from_vk(method, payload={}, 
@@ -28,6 +29,9 @@ def main():
     access_token = os.getenv("ACCESS_TOKEN")
     vk_api_version = os.getenv("VERSION")
     vk_group_id = os.getenv("GROUP_ID")
+    
+    comics_photo = fetch_xkcd.download_random_comics()
+
     payload = {
         'access_token': access_token,
         'v': vk_api_version,  
@@ -38,7 +42,7 @@ def main():
     #
     upload_url = response_getwall['response']['upload_url']
     #Формируем структуру данных с изображением
-    image_file_descriptor = open('images/python_comics.png', 'rb')
+    image_file_descriptor = open(comics_photo['filename'], 'rb')
     post_data = { 'photo': image_file_descriptor}
     #Загружаем изображение на сервер
     response_upload_photo = make_post_request_to_vk(url=upload_url, files=post_data)
@@ -70,7 +74,7 @@ def main():
         'attachments': attachments_temp.format(owner_id=owner_id, 
                                                 media_id=media_id),
         'from_group': 1,
-        'message': 'Веселый комикс для веселого дня!'
+        'message': comics_photo['alt']
     }
     
     #url = '{host}/{method}'.format(host='https://api.vk.com/method', 
