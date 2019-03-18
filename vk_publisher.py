@@ -131,8 +131,8 @@ def main():
         print(item)
     if post_id is None:
         exit("The comics can't be posted to the wall")
-    print('The random comics #{number} is posted to the wall of group'
-        '{group_id} with post id {post_id}'.format(
+    print('The random comics #{number} is posted to the wall of group '
+        '#{group_id} with post id #{post_id}'.format(
             number=comics_photo['num'],
             group_id=vk_group_id,
             post_id=post_id
