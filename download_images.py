@@ -77,17 +77,22 @@ def download_images_by_urls_and_names(image_urls):
         print(download_image(image['url'], image_filename)['msg'])
 
 
-def delete_file_and_empty_dir(filepath):
+def delete_file_and_dir(filepath):
+    file_deleted = False
     try:
         os.remove(filepath)
+        file_deleted = True
+        msg = ['File is removed: {}'.format(filepath)]
     except OSError as error:
-        msg = 'Error removing file: {}'.format(error.msg)
-        return msg
+        msg = ['Error removing file {} with error: {}'.format(filepath, error)]
     try:
         os.rmdir('images')
+        msg('Empty directory "images" is removed')
     except OSError as error:
-        msg = 'Error removing directory: {}'.format(error.msg)
-        return msg
+        msg.append('Directory "images" is not empty: {}'.format(error))
+    finally:
+        return {"result":file_deleted, "msg":msg}
+
 
 
 def main():
