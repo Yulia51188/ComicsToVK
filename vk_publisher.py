@@ -74,7 +74,7 @@ def post_image_to_wall(image_album_data, base_payload, comment=''):
     attachments_temp = 'photo{owner_id}_{media_id}'
     attachments = attachments_temp.format(
         owner_id=owner_id, 
-        media_id=
+        media_id=media_id,
     )    
     payload['attachments'] = attachments
     payload['from_group'] = 1
@@ -89,7 +89,7 @@ def post_image_to_wall(image_album_data, base_payload, comment=''):
     return response_wallpost['response']['post_id']
 
 
-def post_photo_to_wall(access_token, vk_group_id, version, file_data):
+def post_photo_to_wall(access_token, vk_group_id, version, filepath, comment):
     base_payload = {
         'access_token': access_token,
         'v': version,  
@@ -99,7 +99,7 @@ def post_photo_to_wall(access_token, vk_group_id, version, file_data):
     if upload_url is None:
         exit('Get server upload url failed')  
     image_server_data = upload_image_to_server(
-        file_data['filename'], 
+        filepath, 
         upload_url
     )
     if image_server_data is None:
@@ -110,7 +110,7 @@ def post_photo_to_wall(access_token, vk_group_id, version, file_data):
     post_id = post_image_to_wall(
         image_album_data, 
         base_payload, 
-        comment=file_data['alt']
+        comment=comment
     )
     return post_id
 
@@ -124,7 +124,8 @@ def main():
         access_token, 
         vk_group_id, 
         vk_api_version, 
-        comics_photo
+        comics_photo['filename'],
+        '{0}\n{1}'.format(comics_photo['title'].upper(),comics_photo['alt']),
     )
     if post_id is None:
         exit("The comics can't be posted to the wall")
