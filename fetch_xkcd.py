@@ -20,6 +20,7 @@ def download_random_comics():
     random_number = random.randint(1, max_number)
     comics_data = fetch_xkcd(number=random_number)
     download_result = download_images.download_image(comics_data['img'], 'comics.png')
+    print(download_result['msg'])
     saved_comics_data = comics_data
     saved_comics_data['filename'] = download_result['filename']
     return saved_comics_data
