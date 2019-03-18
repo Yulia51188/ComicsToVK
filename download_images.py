@@ -35,7 +35,7 @@ def save_image_as_file_in_folder(image, folder_name='images',
 def get_file_extention(url, default_url_list=('jpg', 'jpeg', 'tif', 'pdf', 
                                             'png', 'bmp')):
     parts = url.split('.')
-    if len(parts)>0 and parts[-1] in :
+    if len(parts)>0 and parts[-1] in default_url_list:
         return parts[-1]
     else:
         return 'jpeg'
