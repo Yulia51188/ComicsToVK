@@ -2,6 +2,7 @@ import requests
 from dotenv import load_dotenv
 import os
 import fetch_xkcd
+from download_images import delete_file_and_dir
 
 
 def get_request_to_vk(method, payload={}, 
@@ -81,6 +82,27 @@ def main():
     #                                method='wall.post')
     response_wallpost = make_post_request_to_vk(method='wall.post', params=payload)
     print(response_wallpost)
+
+
+def main():
+    load_dotenv()
+    access_token = os.getenv("ACCESS_TOKEN")
+    vk_api_version = os.getenv("VERSION")
+    vk_group_id = os.getenv("GROUP_ID")
+    comics_photo = fetch_xkcd.download_random_comics()
+    if not publish_comics_to_wall(
+        access_token, 
+        vk_group_id, 
+        vk_api_version, 
+        comics_photo,
+    ):
+        exit("The random comics is download but can't be published to the wall")
+    for item in delete_file_and_dir(comics_photo['filename'])['msg']:
+        print(item)
+    exit()
+
+    
+    
 
 if __name__ == '__main__':
     main()
