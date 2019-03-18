@@ -127,6 +127,8 @@ def main():
         comics_photo['filename'],
         '{0}\n{1}'.format(comics_photo['title'].upper(),comics_photo['alt']),
     )
+    for item in delete_file_and_dir(comics_photo['filename'])['msg']:
+        print(item)
     if post_id is None:
         exit("The comics can't be posted to the wall")
     print('The random comics #{number} is posted to the wall of group'
@@ -135,9 +137,6 @@ def main():
             group_id=vk_group_id,
             post_id=post_id
         ))
-    for item in delete_file_and_dir(comics_photo['filename'])['msg']:
-        print(item)
-    exit() 
     
 
 if __name__ == '__main__':
