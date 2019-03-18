@@ -39,12 +39,48 @@ def upload_image_to_server(filename, upload_url):
     post_data = { 'photo': image_file_descriptor}
     response_upload = make_post_request_to_vk(url=upload_url, files=post_data)
     if (not 'photo' in response_upload.keys() or 
-        response_upload['photo'] is []):
+            response_upload['photo'] is []):
         return
     return response_upload
 
 
-def publish_comics_to_wall(access_token, vk_group_id, version, file_data):
+def add_image_to_album(image_server_data, base_payload):
+    photo_server = image_server_data['server']
+    photo_json = image_server_data['photo']
+    photo_hash = image_server_data['hash']
+    payload = base_payload
+    payload['server'] = photo_server
+    payload['photo'] = photo_json
+    payload['hash'] = photo_hash 
+    response_add_to_album = make_post_request_to_vk(
+        method='photos.saveWallPhoto', 
+        params=payload
+    )
+    if (not 'response' in response_add_to_album.keys() or
+            not 'id' in response_add_to_album['response'][0]):
+        return
+    return response_add_to_album
+
+
+def post_image_to_wall(image_album_data, base_payload, comment=''):
+    owner_id = image_album_data['response'][0]['owner_id']
+    media_id = image_album_data['response'][0]['id']
+    payload = base_payload
+    payload['owner_id'] = '-{id}'.format(id=base_payload['group_id'])
+    attachments_temp = 'photo{owner_id}_{media_id}'
+    attachments = attachments_temp.format(owner_id=owner_id, media_id=media_id)    
+    payload['attachments'] = attachments
+    payload['from_group'] = 1
+    payload['message'] = comment
+    response_wallpost = make_post_request_to_vk(method='wall.post', 
+                                                params=payload)    
+    if (not 'response' in response_wallpost.keys() or
+            not 'post_id' in response_wallpost['response'].keys()):
+        return
+    return response_wallpost['response']['post_id']
+
+
+def post_photo_to_wall(access_token, vk_group_id, version, file_data):
     base_payload = {
         'access_token': access_token,
         'v': version,  
@@ -53,46 +89,15 @@ def publish_comics_to_wall(access_token, vk_group_id, version, file_data):
     upload_url = get_server_upload_url(base_payload)
     if upload_url is None:
         exit('Get server upload url failed')  
-    #Формируем структуру данных с изображением
     image_server_data = upload_image_to_server(file_data['filename'], upload_url)
     if image_server_data is None:
         exit('Upload image to server failed')        
-    #Разбираем данные из ответа сервера
-    photo_server = image_server_data['server']
-    photo_json = image_server_data['photo']
-    photo_hash = image_server_data['hash']
-    payload = {
-        'access_token': access_token,
-        'v': version,  
-        'server': photo_server,
-        'photo': photo_json,
-        'hash': photo_hash, 
-        'group_id': vk_group_id,
-    }
-    #Загружаем изображение в альбом VK
-    #url = '{host}/{method}'.format(host='https://api.vk.com/method', 
-    #                                method='photos.saveWallPhoto')
-    response_save_wall = make_post_request_to_vk(method='photos.saveWallPhoto', params=payload)
-    print(response_save_wall)
-    #Публикуем фото на стене группы
-    owner_id = response_save_wall['response'][0]['owner_id']
-    media_id = response_save_wall['response'][0]['id']
-    attachments_temp = 'photo{owner_id}_{media_id}'
-    payload = {
-        'access_token': access_token,
-        'v': version,  
-        'owner_id': '-{id}'.format(id=vk_group_id),
-        'attachments': attachments_temp.format(owner_id=owner_id, 
-                                                media_id=media_id),
-        'from_group': 1,
-        'message': file_data['alt']
-    }
-    
-    #url = '{host}/{method}'.format(host='https://api.vk.com/method', 
-    #                                method='wall.post')
-    response_wallpost = make_post_request_to_vk(method='wall.post', params=payload)
-    print(response_wallpost)
-    return True
+    image_album_data = add_image_to_album(image_server_data, base_payload)
+    if image_album_data is None:
+        exit('Adding image to server failed')      
+    return post_image_to_wall(image_album_data, base_payload, comment=file_data['alt'])
+
+
 
 
 def main():
@@ -101,13 +106,20 @@ def main():
     vk_api_version = os.getenv("VERSION")
     vk_group_id = os.getenv("GROUP_ID")
     comics_photo = fetch_xkcd.download_random_comics()
-    if not publish_comics_to_wall(
+    post_id = post_photo_to_wall(
         access_token, 
         vk_group_id, 
         vk_api_version, 
-        comics_photo,
-    ):
-        exit("The random comics is download but can't be published to the wall")
+        comics_photo
+    )
+    if post_id is None:
+        exit("The comics can't be posted to the wall")
+    print('The random comics #{number} is posted to the wall of group \
+        {group_id} with post id {post_id}'.format(
+            number=comics_photo['num'],
+            group_id=vk_group_id,
+            post_id=post_id
+        ))
     for item in delete_file_and_dir(comics_photo['filename'])['msg']:
         print(item)
     exit()
