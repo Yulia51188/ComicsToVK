@@ -4,7 +4,7 @@ import os
 import fetch_xkcd
 
 
-def get_response_from_vk(method, payload={}, 
+def get_request_to_vk(method, payload={}, 
                         host='https://api.vk.com/method'):
     url = '{host}/{method}'.format(host=host, method=method)
     print('GET request to {url}'.format(url=url))
