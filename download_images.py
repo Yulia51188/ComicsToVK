@@ -32,13 +32,13 @@ def save_image_as_file_in_folder(image, folder_name='images',
     return filename
 
 
-# def get_file_extention(url, default_url_list=('jpg', 'jpeg', 'tif', 'pdf', 
-#                                             'png', 'bmp')):
-#     parts = url.split('.')
-#     if len(parts)>0 and parts[-1] in :
-#         return parts[-1]
-#     else:
-#         return 'jpeg'
+def get_file_extention(url, default_url_list=('jpg', 'jpeg', 'tif', 'pdf', 
+                                            'png', 'bmp')):
+    parts = url.split('.')
+    if len(parts)>0 and parts[-1] in :
+        return parts[-1]
+    else:
+        return 'jpeg'
 
 
 def download_image(image_url, image_filename):
@@ -75,6 +75,19 @@ def download_images_by_urls_and_names(image_urls):
             extention=ext
         )
         print(download_image(image['url'], image_filename)['msg'])
+
+
+def delete_file_and_empty_dir(filepath):
+    try:
+        os.remove(filepath)
+    except OSError as error:
+        msg = 'Error removing file: {}'.format(error.msg)
+        return msg
+    try:
+        os.rmdir('images')
+    except OSError as error:
+        msg = 'Error removing directory: {}'.format(error.msg)
+        return msg
 
 
 def main():
