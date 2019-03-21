@@ -10,8 +10,7 @@ def get_request_to_vk(method, payload={},
     url = '{host}/{method}'.format(host=host, method=method)
     response = requests.get(url, params=payload)
     response.raise_for_status()
-    if response.ok:
-        return response.json()
+    return response.json()
 
 
 def make_post_request_to_vk(input_url=None, method=None, params={}, 
@@ -22,8 +21,7 @@ def make_post_request_to_vk(input_url=None, method=None, params={},
         url = input_url
     response = requests.post(url, files=files, params=params)
     response.raise_for_status()
-    if response.ok:
-        return response.json()
+    return response.json()
 
 
 def get_server_upload_url(payload):
