@@ -40,7 +40,10 @@ def get_server_upload_url(payload):
 def upload_image_to_server(filename, upload_url):
     image_file_descriptor = open(filename, 'rb')
     post_data = { 'photo': image_file_descriptor}
-    response_upload = make_post_request_to_vk(input_url=upload_url, files=post_data)
+    response_upload = make_post_request_to_vk(
+        input_url=upload_url, 
+        files=post_data
+    )
     if (not 'photo' in response_upload.keys() or 
             response_upload['photo'] is []):
         return
@@ -48,13 +51,15 @@ def upload_image_to_server(filename, upload_url):
 
 
 def add_image_to_album(image_server_data, base_payload):
-    photo_server = image_server_data['server']
-    photo_json = image_server_data['photo']
-    photo_hash = image_server_data['hash']
-    payload = dict(base_payload)
-    payload['server'] = photo_server
-    payload['photo'] = photo_json
-    payload['hash'] = photo_hash 
+    photo_server = 
+    photo_json = 
+    photo_hash = 
+    payload = {
+        **base_payload,
+        'server': image_server_data['server'],
+        'photo': image_server_data['photo'],
+        'hash': image_server_data['hash'],      
+    }
     response_add_to_album = make_post_request_to_vk(
         method='photos.saveWallPhoto', 
         params=payload
@@ -68,16 +73,18 @@ def add_image_to_album(image_server_data, base_payload):
 def post_image_to_wall(image_album_data, base_payload, comment=''):
     owner_id = image_album_data['response'][0]['owner_id']
     media_id = image_album_data['response'][0]['id']
-    payload = dict(base_payload)
-    payload['owner_id'] = '-{id}'.format(id=base_payload['group_id'])
     attachments_temp = 'photo{owner_id}_{media_id}'
     attachments = attachments_temp.format(
         owner_id=owner_id, 
         media_id=media_id,
     )    
-    payload['attachments'] = attachments
-    payload['from_group'] = 1
-    payload['message'] = comment
+    payload = {
+        **base_payload,
+        'owner_id':'-{id}'.format(id=base_payload['group_id']),
+        'attachments':attachments,
+        'from_group':1,
+        'message':comment,        
+    }
     response_wallpost = make_post_request_to_vk(
         method='wall.post', 
         params=payload
