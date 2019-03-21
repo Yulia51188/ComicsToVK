@@ -14,10 +14,12 @@ def get_request_to_vk(method, payload={},
         return response.json()
 
 
-def make_post_request_to_vk(url=None, method=None, params={}, 
+def make_post_request_to_vk(input_url=None, method=None, params={}, 
         files = {}, host='https://api.vk.com/method'):
-    if url is None:
+    if not input_url:
         url = '{host}/{method}'.format(host=host, method=method)
+    else:
+        url = input_url
     response = requests.post(url, files=files, params=params)
     response.raise_for_status()
     if response.ok:
@@ -38,7 +40,7 @@ def get_server_upload_url(payload):
 def upload_image_to_server(filename, upload_url):
     image_file_descriptor = open(filename, 'rb')
     post_data = { 'photo': image_file_descriptor}
-    response_upload = make_post_request_to_vk(url=upload_url, files=post_data)
+    response_upload = make_post_request_to_vk(input_url=upload_url, files=post_data)
     if (not 'photo' in response_upload.keys() or 
             response_upload['photo'] is []):
         return
@@ -49,7 +51,7 @@ def add_image_to_album(image_server_data, base_payload):
     photo_server = image_server_data['server']
     photo_json = image_server_data['photo']
     photo_hash = image_server_data['hash']
-    payload = base_payload
+    payload = dict(base_payload)
     payload['server'] = photo_server
     payload['photo'] = photo_json
     payload['hash'] = photo_hash 
@@ -66,7 +68,7 @@ def add_image_to_album(image_server_data, base_payload):
 def post_image_to_wall(image_album_data, base_payload, comment=''):
     owner_id = image_album_data['response'][0]['owner_id']
     media_id = image_album_data['response'][0]['id']
-    payload = base_payload
+    payload = dict(base_payload)
     payload['owner_id'] = '-{id}'.format(id=base_payload['group_id'])
     attachments_temp = 'photo{owner_id}_{media_id}'
     attachments = attachments_temp.format(
