@@ -43,7 +43,6 @@ def download_random_comics(save_file=True):
             comics_data['img'], 
             'comics.png'
         )
-        print(download_result['msg'])
         saved_comics_data['filename'] = download_result['filename']  
     return saved_comics_data
 

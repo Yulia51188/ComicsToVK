@@ -8,7 +8,6 @@ from download_images import delete_file_and_dir
 def get_request_to_vk(method, payload={}, 
         host='https://api.vk.com/method'):
     url = '{host}/{method}'.format(host=host, method=method)
-    print('GET request to {url}'.format(url=url))
     response = requests.get(url, params=payload)
     response.raise_for_status()
     if response.ok:
@@ -19,7 +18,6 @@ def make_post_request_to_vk(url=None, method=None, params={},
         files = {}, host='https://api.vk.com/method'):
     if url is None:
         url = '{host}/{method}'.format(host=host, method=method)
-    print('POST request to {url}'.format(url=url))
     response = requests.post(url, files=files, params=params)
     response.raise_for_status()
     if response.ok:
@@ -31,7 +29,6 @@ def get_server_upload_url(payload):
         'photos.getWallUploadServer', 
         payload=payload
     )
-    print('Ключи getwall: {}'.format(response_getwall.keys()))
     if (not 'response' in response_getwall.keys() or 
             not 'upload_url' in response_getwall['response'].keys()):
         return
@@ -88,7 +85,8 @@ def post_image_to_wall(image_album_data, base_payload, comment=''):
         return
     return response_wallpost['response']['post_id']
 
-def VKWallPostError(Exception):
+
+class VKWallPostError(Exception):
     pass
 
 
@@ -99,22 +97,24 @@ def post_photo_to_wall(access_token, vk_group_id, version, filepath, comment):
         'group_id': vk_group_id, 
     }
     upload_url = get_server_upload_url(base_payload)
-    if upload_url is None:
+    if not upload_url:
         raise VKWallPostError('Getting server upload url failed') 
     image_server_data = upload_image_to_server(
         filepath, 
         upload_url
     )
-    if image_server_data is None:
+    if not image_server_data:
         raise VKWallPostError('Upload image to server failed')     
     image_album_data = add_image_to_album(image_server_data, base_payload)
-    if image_album_data is None:
+    if not image_album_data:
         raise VKWallPostError('Adding image to server failed')  
     post_id = post_image_to_wall(
         image_album_data, 
         base_payload, 
         comment=comment
     )
+    if not post_id:
+        raise VKWallPostError('Posting image to the wall failed.')         
     return post_id
 
 def main():
@@ -123,23 +123,25 @@ def main():
     vk_api_version = os.getenv("VERSION")
     vk_group_id = os.getenv("GROUP_ID")
     comics_photo = fetch_xkcd.download_random_comics()
-    post_id = post_photo_to_wall(
-        access_token, 
-        vk_group_id, 
-        vk_api_version, 
-        comics_photo['filename'],
-        '{0}\n{1}'.format(comics_photo['title'].upper(),comics_photo['alt']),
-    )
-    for item in delete_file_and_dir(comics_photo['filename'])['msg']:
-        print(item)
-    if post_id is None:
-        exit("The comics can't be posted to the wall")
-    print('The random comics №{number} is posted to the wall of group '
-        '{group_id} with post id {post_id}'.format(
+    try:
+        post_id = post_photo_to_wall(
+            access_token, 
+            vk_group_id, 
+            vk_api_version, 
+            comics_photo['filename'],
+            '{0}\n{1}'.format(comics_photo['title'].upper(),comics_photo['alt']),
+        )   
+        print('The random comics №{number} is posted to the wall of group '
+            '{group_id} with post id {post_id}'.format(
             number=comics_photo['num'],
             group_id=vk_group_id,
             post_id=post_id
         ))
+    except VKWallPostError as error:
+        exit(error)
+    finally:
+        if not delete_file_and_dir(comics_photo['filename'])['result']:
+            exit("Attention! Downloaded file with image can't be deleted")
     
 
 if __name__ == '__main__':

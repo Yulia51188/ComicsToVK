@@ -64,7 +64,7 @@ def download_images_by_urls(image_urls, image_filename_template='space'):
             number=image_index,
             extention=ext
         )
-        print(download_image(image_url, image_filename)['msg'])
+        download_image(image_url, image_filename)['msg']
 
 
 def download_images_by_urls_and_names(image_urls):
@@ -74,7 +74,7 @@ def download_images_by_urls_and_names(image_urls):
             name=image['name'],       
             extention=ext
         )
-        print(download_image(image['url'], image_filename)['msg'])
+        download_image(image['url'], image_filename)['msg']
 
 
 def delete_file_and_dir(filepath):
