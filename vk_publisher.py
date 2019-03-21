@@ -36,12 +36,12 @@ def get_server_upload_url(payload):
 
 
 def upload_image_to_server(filename, upload_url):
-    image_file_descriptor = open(filename, 'rb')
-    post_data = { 'photo': image_file_descriptor}
-    response_upload = make_post_request_to_vk(
-        input_url=upload_url, 
-        files=post_data
-    )
+    with  open(filename, 'rb') as image_file_descriptor:
+        post_data = { 'photo': image_file_descriptor}
+        response_upload = make_post_request_to_vk(
+            input_url=upload_url, 
+            files=post_data
+        )
     if ('photo' not in response_upload.keys() or 
             not response_upload['photo']):
         return
