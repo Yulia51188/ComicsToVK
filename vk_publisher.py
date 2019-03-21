@@ -31,8 +31,8 @@ def get_server_upload_url(payload):
         'photos.getWallUploadServer', 
         payload=payload
     )
-    if (not 'response' in response_getwall.keys() or 
-            not 'upload_url' in response_getwall['response'].keys()):
+    if ('response' not in response_getwall.keys() or 
+            'upload_url' not in response_getwall['response'].keys()):
         return
     return response_getwall['response']['upload_url']
 
@@ -44,16 +44,13 @@ def upload_image_to_server(filename, upload_url):
         input_url=upload_url, 
         files=post_data
     )
-    if (not 'photo' in response_upload.keys() or 
-            response_upload['photo'] is []):
+    if ('photo' not in response_upload.keys() or 
+            not response_upload['photo']):
         return
     return response_upload
 
 
 def add_image_to_album(image_server_data, base_payload):
-    photo_server = 
-    photo_json = 
-    photo_hash = 
     payload = {
         **base_payload,
         'server': image_server_data['server'],
@@ -64,8 +61,8 @@ def add_image_to_album(image_server_data, base_payload):
         method='photos.saveWallPhoto', 
         params=payload
     )
-    if (not 'response' in response_add_to_album.keys() or
-            not 'id' in response_add_to_album['response'][0]):
+    if ('response' not in response_add_to_album.keys() or
+            'id' not in response_add_to_album['response'][0]):
         return
     return response_add_to_album
 
@@ -89,8 +86,8 @@ def post_image_to_wall(image_album_data, base_payload, comment=''):
         method='wall.post', 
         params=payload
     )    
-    if (not 'response' in response_wallpost.keys() or
-            not 'post_id' in response_wallpost['response'].keys()):
+    if ('response' not in response_wallpost.keys() or
+            'post_id' not in response_wallpost['response'].keys()):
         return
     return response_wallpost['response']['post_id']
 

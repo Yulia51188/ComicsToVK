@@ -21,7 +21,7 @@ def parse_arguments():
 
 
 def fetch_xkcd(host='http://xkcd.com', method='info.0.json', number=None):
-    if not number is None:
+    if number is not None:
         method_api = '{0}/{1}'.format(number, method)
     else:
         method_api = method        
@@ -54,7 +54,7 @@ def get_comics_count():
 
 def main():
     args = parse_arguments()
-    if args.number is None:
+    if not args.number:
         print(download_random_comics(save_file=False))
         exit()
     if args.number == 0:
