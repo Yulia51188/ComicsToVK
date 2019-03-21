@@ -88,6 +88,9 @@ def post_image_to_wall(image_album_data, base_payload, comment=''):
         return
     return response_wallpost['response']['post_id']
 
+def VKWallPostError(Exception):
+    pass
+
 
 def post_photo_to_wall(access_token, vk_group_id, version, filepath, comment):
     base_payload = {
@@ -97,16 +100,16 @@ def post_photo_to_wall(access_token, vk_group_id, version, filepath, comment):
     }
     upload_url = get_server_upload_url(base_payload)
     if upload_url is None:
-        exit('Get server upload url failed')  
+        raise VKWallPostError('Getting server upload url failed') 
     image_server_data = upload_image_to_server(
         filepath, 
         upload_url
     )
     if image_server_data is None:
-        exit('Upload image to server failed')        
+        raise VKWallPostError('Upload image to server failed')     
     image_album_data = add_image_to_album(image_server_data, base_payload)
     if image_album_data is None:
-        exit('Adding image to server failed')      
+        raise VKWallPostError('Adding image to server failed')  
     post_id = post_image_to_wall(
         image_album_data, 
         base_payload, 
