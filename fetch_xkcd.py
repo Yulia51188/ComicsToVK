@@ -28,8 +28,7 @@ def fetch_xkcd(host='http://xkcd.com', method='info.0.json', number=None):
     url = '{host}/{method}'.format(host=host, method=method_api)
     response = requests.get(url)
     response.raise_for_status()
-    if response.ok:
-        return response.json()
+    return response.json()
 
 
 def download_random_comics(save_file=True):
